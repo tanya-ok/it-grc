@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "it-grc"
+dynamic = ["version"]
+description = "Push executed security-lab evidence into CISO Assistant Community edition and verify it against a local ledger"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Tanya Babitskaya" }]
+keywords = ["grc", "ciso-assistant", "compliance", "evidence", "nist-sp-800-66", "hipaa", "security-lab", "audit-ledger"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Security",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://tanya-ok.github.io/it-grc/"
+Documentation = "https://tanya-ok.github.io/it-grc/"
+Source = "https://github.com/tanya-ok/it-grc"
+Issues = "https://github.com/tanya-ok/it-grc/issues"
+
+[project.scripts]
+it-grc = "it_grc.cli:main"
+
+[dependency-groups]
+dev = [
+  "ruff==0.17.0",
+  "mypy==2.4.0",
+]
+
+[tool.hatch.version]
+path = "src/it_grc/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/it_grc"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/README.md", "/CHANGELOG.md", "/LICENSE", "/NOTICE", "/pyproject.toml"]
+exclude = ["**/__pycache__", "**/*.pyc"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PL", "S", "BLE", "N", "PTH", "C4"]
+ignore = ["PLR2004"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert, describe refused wildcard forwards and run sys.executable or openssl.
+"tests/**" = ["S101", "S104", "S603", "S607"]
+# InvalidEvidence is part of the module interface.
+"src/it_grc/lab_report.py" = ["N818"]
+# The opener has only an HTTPS handler and check_origin refuses any other scheme.
+"src/it_grc/grc_client.py" = ["S310"]
+# Runs only sys.executable with the repository's own scripts/grc_lab.py and a fixed argument.
+"src/it_grc/grc_ops.py" = ["S603"]
+# Fixed argv lists for limactl, kubectl and helm; /tmp paths come from mktemp inside the VM;
+# fetch() refuses any scheme other than https before urlopen.
+"scripts/grc_lab.py" = ["S108", "S310", "S603", "S607"]
+# download() refuses any URL other than the pinned https raw.githubusercontent.com source.
+"scripts/check_mapping_contract.py" = ["S310"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "scripts"]

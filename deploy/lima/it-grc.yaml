@@ -1,0 +1,135 @@
+# Dedicated IT GRC VM: unmodified CISO Assistant CE on k3s, managed by scripts/grc_lab.py.
+# No host mounts, no SSH agent or keys, one HTTPS forward to host loopback.
+# Every pin below mirrors deploy/upstream.json; tests keep the two in sync.
+minimumLimaVersion: 2.2.1
+vmType: vz
+cpus: 2
+memory: 4GiB
+disk: 20GiB
+param:
+  owner: it-grc
+images:
+  - location: https://cloud.debian.org/images/cloud/trixie/20261001-2618/debian-13-genericcloud-arm64-20261001-2618.qcow2
+    arch: aarch64
+    digest: sha512:d8470b8c6c38fead046c794b5800a5a7b96672d5bcf543cc230ceb0c4b8ace05ed341a0c8928045422243fde26b2f1f2f58e99244c65709ffda2e3d4b674dd5a
+  - location: https://cloud.debian.org/images/cloud/trixie/20261001-2618/debian-13-genericcloud-amd64-20261001-2618.qcow2
+    arch: x86_64
+    digest: sha512:f46f0671a6e5bdec5291ab8972bae2f10e5408c2f64a74078f11efc2f06a436a9d0313ed50e0472542eeabf780e9f7c792ac0a314c6c20507fcd9fd81b468c3d
+mounts: []
+containerd:
+  system: false
+  user: false
+ssh:
+  forwardAgent: false
+  forwardX11: false
+  loadDotSSHPubKeys: false
+propagateProxyEnv: false
+upgradePackages: false
+portForwards:
+  - guestIP: 127.0.0.1
+    guestPort: 18443
+    hostIP: 127.0.0.1
+    hostPort: 18443
+    proto: tcp
+  - guestIP: 0.0.0.0
+    guestIPMustBeZero: false
+    guestPortRange: [1, 65535]
+    proto: any
+    ignore: true
+provision:
+  - mode: system
+    script: |
+      #!/bin/sh
+      set -eu
+      # Owner: {{.Param.owner}}
+      if ! command -v curl >/dev/null 2>&1; then
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl ca-certificates
+        apt-get clean
+        rm -rf /var/lib/apt/lists/*
+      fi
+      k3s_version='v1.37.1+k3s1'
+      helm_version='v4.3.0'
+      case "$(uname -m)" in
+        aarch64)
+          k3s_asset=k3s-arm64
+          k3s_sha256=a1561ca4aef8b99f5588a840d4468ac39c8c1cd92470bbcb9634823fa221741a
+          helm_arch=arm64
+          helm_sha256=31c5794dd55c66a51e6b7d2e2ac7a114ae8b1de41ff1d9ba51748ac973b06a08
+          ;;
+        x86_64)
+          k3s_asset=k3s
+          k3s_sha256=92b94582eb7b34a8cf532e6006842b9ed215a6783cf56a3dd6271fd35243b2c0
+          helm_arch=amd64
+          helm_sha256=86584a54def73570558f66f5111cc53dfed56689637ae32c1201205d494f54fb
+          ;;
+        *) exit 1 ;;
+      esac
+      staging=$(mktemp -d)
+      trap 'rm -rf "$staging"' EXIT
+      if ! /usr/local/bin/k3s --version 2>/dev/null | head -1 | grep -Fq "$k3s_version"; then
+        curl --fail --silent --show-error --location --retry 3 \
+          "https://github.com/k3s-io/k3s/releases/download/$k3s_version/$k3s_asset" -o "$staging/$k3s_asset"
+        (cd "$staging" && printf '%s  %s\n' "$k3s_sha256" "$k3s_asset" | sha256sum --check --strict --quiet)
+        install -m 0755 "$staging/$k3s_asset" /usr/local/bin/k3s
+      fi
+      if ! /usr/local/bin/helm version --short 2>/dev/null | grep -Fq "$helm_version"; then
+        archive="helm-$helm_version-linux-$helm_arch.tar.gz"
+        curl --fail --silent --show-error --location --retry 3 \
+          "https://get.helm.sh/$archive" -o "$staging/$archive"
+        (cd "$staging" && printf '%s  %s\n' "$helm_sha256" "$archive" | sha256sum --check --strict --quiet)
+        tar -xzf "$staging/$archive" -C "$staging" "linux-$helm_arch/helm"
+        install -m 0755 "$staging/linux-$helm_arch/helm" /usr/local/bin/helm
+      fi
+      mkdir -p /etc/rancher/k3s
+      cat > /etc/rancher/k3s/config.yaml <<'CONFIG'
+      node-name: it-grc
+      write-kubeconfig-mode: '0600'
+      disable:
+        - traefik
+        - servicelb
+        - metrics-server
+        - local-storage
+      disable-helm-controller: true
+      secrets-encryption: true
+      CONFIG
+      cat > /etc/systemd/system/k3s.service <<'UNIT'
+      [Unit]
+      Description=IT GRC Kubernetes and containerd
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=notify
+      ExecStart=/usr/local/bin/k3s server
+      Restart=on-failure
+      RestartSec=5
+      KillMode=process
+      Delegate=yes
+      LimitNOFILE=1048576
+      TasksMax=infinity
+      [Install]
+      WantedBy=multi-user.target
+      UNIT
+      # The only path into the cluster: guest loopback 18443 to the TLS pod.
+      # Enabled by `grc_lab.py up`, disabled by `grc_lab.py down`.
+      cat > /etc/systemd/system/it-grc-https.service <<'UNIT'
+      [Unit]
+      Description=IT GRC HTTPS forward from guest loopback to the TLS pod
+      After=k3s.service
+      Requires=k3s.service
+      StartLimitIntervalSec=0
+      [Service]
+      ExecStart=/usr/local/bin/k3s kubectl --namespace it-grc port-forward --address 127.0.0.1 deployment/it-grc-tls 18443:18443
+      Restart=always
+      RestartSec=5
+      [Install]
+      WantedBy=multi-user.target
+      UNIT
+      systemctl daemon-reload
+      systemctl enable --now k3s
+probes:
+  - script: |
+      #!/bin/sh
+      set -eu
+      sudo k3s kubectl wait --for=condition=Ready node/it-grc --timeout=10s
+    hint: The dedicated it-grc Kubernetes node must be ready; no kubeconfig is copied to the host.

@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "timestamp": "2026-10-13T07:51:16.369462+00:00",
+  "spire": "1.15.3",
+  "svid_ttl_seconds": 60,
+  "backend": "lima-kubernetes-containerd",
+  "results": [
+    {
+      "scenario": 1,
+      "passed": true,
+      "description": "allowlisted read and write"
+    },
+    {
+      "scenario": 2,
+      "passed": true,
+      "description": "per-tool scope denial"
+    },
+    {
+      "scenario": 3,
+      "passed": true,
+      "description": "unlisted identity denied"
+    },
+    {
+      "scenario": 4,
+      "passed": true,
+      "description": "cross-resource replay denied"
+    },
+    {
+      "scenario": 5,
+      "passed": true,
+      "description": "copied labels do not impersonate another ServiceAccount"
+    },
+    {
+      "scenario": 6,
+      "passed": true,
+      "description": "untrusted issuer refused"
+    },
+    {
+      "scenario": 7,
+      "passed": true,
+      "description": "cached SVID reuse permitted; three real fetches yielded 1 distinct signed assertions"
+    },
+    {
+      "scenario": 8,
+      "passed": true,
+      "description": "own upstream identity; byte-level no-passthrough proof in offline tests"
+    },
+    {
+      "scenario": 9,
+      "passed": true,
+      "description": "new tokens denied after policy revocation"
+    },
+    {
+      "scenario": 10,
+      "passed": true,
+      "description": "identity cannot determine intent; a granted write still succeeds"
+    },
+    {
+      "scenario": 11,
+      "passed": true,
+      "description": "restart key accepted; planned overlap preserves old and new tokens"
+    },
+    {
+      "scenario": 12,
+      "passed": true,
+      "description": "continued token requests through SVID expiry; expired assertion refused"
+    },
+    {
+      "scenario": 13,
+      "passed": true,
+      "description": "default strict SVID single-use rejection"
+    },
+    {
+      "scenario": 14,
+      "passed": true,
+      "description": "audit links verify; checkpoint detects tail deletion"
+    },
+    {
+      "scenario": 15,
+      "passed": true,
+      "description": "FHIR SPIRE mTLS/OAuth: allowed"
+    },
+    {
+      "scenario": 16,
+      "passed": true,
+      "description": "FHIR SPIRE mTLS/OAuth: intruder"
+    },
+    {
+      "scenario": 17,
+      "passed": true,
+      "description": "FHIR SPIRE mTLS/OAuth: no-cert"
+    },
+    {
+      "scenario": 18,
+      "passed": true,
+      "description": "FHIR audit caller and data minimization verified"
+    }
+  ],
+  "passed": true
+}

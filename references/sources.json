@@ -1,0 +1,29 @@
+{
+  "catalog_version": 1,
+  "sources": [
+    {
+      "id": "hhs-security-rule",
+      "title": "The HIPAA Security Rule",
+      "publisher": "U.S. Department of Health and Human Services",
+      "url": "https://www.hhs.gov/hipaa/for-professionals/security/index.html",
+      "reference_checked_on": "2026-10-06",
+      "role": "Authoritative scope overview; follow its regulation links for exact requirements"
+    },
+    {
+      "id": "hhs-risk-analysis",
+      "title": "Final Guidance on Risk Analysis",
+      "publisher": "U.S. Department of Health and Human Services",
+      "url": "https://www.hhs.gov/hipaa/for-professionals/security/guidance/final-guidance-risk-analysis/index.html",
+      "reference_checked_on": "2026-10-06",
+      "role": "Official entry point for risk analysis guidance; not a complete requirements catalog"
+    },
+    {
+      "id": "hhs-security-summary",
+      "title": "Summary of the HIPAA Security Rule",
+      "publisher": "U.S. Department of Health and Human Services",
+      "url": "https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html",
+      "reference_checked_on": "2026-10-06",
+      "role": "Official overview of the currently effective rule; linked regulations govern exact requirements"
+    }
+  ]
+}

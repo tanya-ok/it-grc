@@ -1,0 +1,123 @@
+# Non-secret values for the official CISO Assistant CE chart 0.13.3, release it-grc,
+# namespace it-grc. scripts/grc_lab.py creates every referenced Secret from owner-only
+# files or in-guest generation; no secret value belongs in this file or in --set.
+# Image pins mirror deploy/upstream.json; tests keep the two in sync.
+global:
+  domain: localhost:18443
+  tls: true
+  image:
+    tag: v4.1.1
+  securityContext:
+    runAsNonRoot: true
+    fsGroup: 1001
+    seccompProfile:
+      type: RuntimeDefault
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+
+backend:
+  config:
+    # Empty on purpose: a non-empty value makes the backend create a superuser without a
+    # usable password. bootstrap-admin supplies the account through the env below.
+    emailAdmin: ""
+    databaseType: sqlite
+    djangoExistingSecretKey: it-grc-django
+    smtp:
+      host: ""
+    oidcProvider:
+      existingSecret: it-grc-oidc
+  image:
+    tag: v4.1.1@sha256:15f31d4eacd3b60e4c08dca206f608adb6db44fc8a0a1f9ad81bf7edc9f2e410
+  env:
+    # Read by the upstream startup script; absent until `grc_lab.py bootstrap-admin`.
+    - name: DJANGO_SUPERUSER_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: it-grc-bootstrap
+          key: admin-email
+          optional: true
+    - name: DJANGO_SUPERUSER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: it-grc-bootstrap
+          key: admin-password
+          optional: true
+    - name: GUNICORN_WORKERS
+      value: "2"
+    # The root filesystem is read-only; keep tool caches in the /tmp emptyDir.
+    - name: HOME
+      value: /tmp
+    - name: XDG_CACHE_HOME
+      value: /tmp/.cache
+    - name: XDG_CONFIG_HOME
+      value: /tmp/.config
+    - name: XDG_DATA_HOME
+      value: /tmp/.local/share
+  persistence:
+    sqlite:
+      enabled: true
+      existingClaim: it-grc-sqlite
+    localStorage:
+      enabled: true
+      existingClaim: it-grc-attachments
+  containerSecurityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]
+  resources:
+    requests:
+      cpu: 250m
+      memory: 768Mi
+    limits:
+      memory: 1536Mi
+  huey:
+    env:
+      - name: HOME
+        value: /tmp
+      - name: XDG_CACHE_HOME
+        value: /tmp/.cache
+      - name: XDG_CONFIG_HOME
+        value: /tmp/.config
+      - name: XDG_DATA_HOME
+        value: /tmp/.local/share
+    resources:
+      requests:
+        cpu: 50m
+        memory: 384Mi
+      limits:
+        memory: 768Mi
+
+frontend:
+  image:
+    tag: v4.1.1@sha256:4a0bd757b9eb5d05555a048f498401d3bde6f8bead554fa12d17fbc099907a7b
+  env:
+    # The image allows a 10 GiB V8 heap; cap it below the container limit so the
+    # garbage collector runs before the kernel OOM killer does.
+    - name: NODE_OPTIONS
+      value: --max-old-space-size=512
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]
+  resources:
+    requests:
+      cpu: 50m
+      memory: 384Mi
+    limits:
+      memory: 768Mi
+
+ingress:
+  enabled: false
+
+# The chart policy selects only release pods. grc_lab.py applies one namespace-wide
+# policy instead, which also covers the TLS pod.
+networkPolicy:
+  enabled: false

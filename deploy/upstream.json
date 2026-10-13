@@ -1,0 +1,83 @@
+{
+  "verified_on": "2026-10-13",
+  "lima_image": {
+    "source": "https://cloud.debian.org/images/cloud/trixie/20261001-2618/SHA512SUMS",
+    "aarch64": {
+      "location": "https://cloud.debian.org/images/cloud/trixie/20261001-2618/debian-13-genericcloud-arm64-20261001-2618.qcow2",
+      "digest": "sha512:d8470b8c6c38fead046c794b5800a5a7b96672d5bcf543cc230ceb0c4b8ace05ed341a0c8928045422243fde26b2f1f2f58e99244c65709ffda2e3d4b674dd5a"
+    },
+    "x86_64": {
+      "location": "https://cloud.debian.org/images/cloud/trixie/20261001-2618/debian-13-genericcloud-amd64-20261001-2618.qcow2",
+      "digest": "sha512:f46f0671a6e5bdec5291ab8972bae2f10e5408c2f64a74078f11efc2f06a436a9d0313ed50e0472542eeabf780e9f7c792ac0a314c6c20507fcd9fd81b468c3d"
+    }
+  },
+  "k3s": {
+    "version": "v1.37.1+k3s1",
+    "license": "Apache-2.0",
+    "source": "https://github.com/k3s-io/k3s/releases/download/v1.37.1+k3s1/",
+    "aarch64": {
+      "asset": "k3s-arm64",
+      "checksums": "sha256sum-arm64.txt",
+      "sha256": "a1561ca4aef8b99f5588a840d4468ac39c8c1cd92470bbcb9634823fa221741a"
+    },
+    "x86_64": {
+      "asset": "k3s",
+      "checksums": "sha256sum-amd64.txt",
+      "sha256": "92b94582eb7b34a8cf532e6006842b9ed215a6783cf56a3dd6271fd35243b2c0"
+    }
+  },
+  "helm": {
+    "version": "v4.3.0",
+    "license": "Apache-2.0",
+    "source": "https://get.helm.sh/",
+    "aarch64": {
+      "asset": "helm-v4.3.0-linux-arm64.tar.gz",
+      "sha256": "31c5794dd55c66a51e6b7d2e2ac7a114ae8b1de41ff1d9ba51748ac973b06a08"
+    },
+    "x86_64": {
+      "asset": "helm-v4.3.0-linux-amd64.tar.gz",
+      "sha256": "86584a54def73570558f66f5111cc53dfed56689637ae32c1201205d494f54fb"
+    }
+  },
+  "chart": {
+    "reference": "oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant",
+    "registry": "ghcr.io",
+    "repository": "intuitem/helm-charts/ce/ciso-assistant",
+    "version": "0.13.3",
+    "digest": "sha256:b25177e4ce80cf91b2a4b199a4c5bd5c4fb9e2d74bf4e5e39525c4c8dba09343",
+    "content_digest": "sha256:15275730977a8829c9e04fc966b6f26be1454bf7abbcb0c004b6f40f147cf6b7"
+  },
+  "images": {
+    "backend": {
+      "registry": "ghcr.io",
+      "repository": "intuitem/ciso-assistant-community/backend",
+      "tag": "v4.1.1",
+      "digest": "sha256:15f31d4eacd3b60e4c08dca206f608adb6db44fc8a0a1f9ad81bf7edc9f2e410",
+      "license": "AGPL-3.0-or-later"
+    },
+    "frontend": {
+      "registry": "ghcr.io",
+      "repository": "intuitem/ciso-assistant-community/frontend",
+      "tag": "v4.1.1",
+      "digest": "sha256:4a0bd757b9eb5d05555a048f498401d3bde6f8bead554fa12d17fbc099907a7b",
+      "license": "AGPL-3.0-or-later"
+    },
+    "caddy": {
+      "registry": "docker.io",
+      "repository": "library/caddy",
+      "tag": "2.11.4",
+      "digest": "sha256:0c994536bddb66445885237f1a5dcc1916bccea922661c76b4e9fc24061f9b52",
+      "license": "Apache-2.0"
+    }
+  },
+  "library": {
+    "urn": "urn:intuitem:risk:library:nist-sp-800-66-rev2",
+    "framework_urn": "urn:intuitem:risk:framework:nist-sp-800-66-rev2",
+    "release": "v4.1.1",
+    "commit": "7a7a5babbdf9dffa10cafb454ff194be401e1aa0",
+    "source": "https://raw.githubusercontent.com/intuitem/ciso-assistant-community/7a7a5babbdf9dffa10cafb454ff194be401e1aa0/backend/library/libraries/nist-sp-800-66-rev2.yaml",
+    "sha256": "1834c999eadbb51c4d12854c9975f23dd1205c9bb909215dff99d43f73753c4e",
+    "requirement_nodes": 179,
+    "assessable_nodes": 152
+  }
+}

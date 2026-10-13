@@ -1,0 +1,1057 @@
+{
+  "schema": "it-grc/mapping/v1",
+  "version": "2026-10-13.1",
+  "framework": "urn:intuitem:risk:framework:nist-sp-800-66-rev2",
+  "verified": {
+    "on": "2026-10-13",
+    "against": "CISO Assistant CE v4.1.1, library urn:intuitem:risk:library:nist-sp-800-66-rev2",
+    "method": "GET /api/requirement-nodes/?urn=<urn> returned exactly one row with an equal URN and assessable true; name and section recorded from that row"
+  },
+  "claims": "Executed lab scenarios on synthetic data. This is not a HIPAA compliance determination, and NIST SP 800-66 rev2 is guidance, not the regulation.",
+  "ceiling": {
+    "result": "partially_compliant",
+    "status": "in_review"
+  },
+  "audit": {
+    "ref_id": "ITGRC-800-66R2",
+    "name": "IT GRC lab evidence: NIST SP 800-66 rev2",
+    "description": "Executed security-lab scenarios on synthetic data, pushed by it-grc. Results are capped at partially_compliant with status in_review and need human review. Not a HIPAA compliance determination.",
+    "domain": "IT GRC Lab",
+    "perimeter": "ITGRC-LAB"
+  },
+  "evidence_groups": [
+    {
+      "ref_id": "ITGRC-EV-ACCESS",
+      "name": "ITGRC-EV-ACCESS Tool authorization (S1, S2, S10)",
+      "scenarios": [
+        1,
+        2,
+        10
+      ],
+      "description": "Allowlisted workload identities call tools within their granted scopes (S1), a tool outside the granted scope is denied (S2) and a granted write succeeds (S10)."
+    },
+    {
+      "ref_id": "ITGRC-EV-IDENTITY",
+      "name": "ITGRC-EV-IDENTITY Workload identity (S3, S5, S8)",
+      "scenarios": [
+        3,
+        5,
+        8
+      ],
+      "description": "An unlisted SPIFFE identity is denied (S3), copied pod labels do not impersonate another ServiceAccount (S5) and the gateway calls upstream services with its own identity (S8)."
+    },
+    {
+      "ref_id": "ITGRC-EV-ASSERTION",
+      "name": "ITGRC-EV-ASSERTION Assertion authentication (S4, S6, S12, S13)",
+      "scenarios": [
+        4,
+        6,
+        12,
+        13
+      ],
+      "description": "A cross-resource replay is denied (S4), an untrusted issuer is refused (S6), an expired assertion is refused after SVID renewal (S12) and strict mode rejects a reused assertion (S13)."
+    },
+    {
+      "ref_id": "ITGRC-EV-FHIR-MTLS",
+      "name": "ITGRC-EV-FHIR-MTLS FHIR gateway mTLS and OAuth (S15, S16, S17)",
+      "scenarios": [
+        15,
+        16,
+        17
+      ],
+      "description": "The FHIR gateway accepts the allowed SPIRE identity over mutual TLS with OAuth (S15) and refuses a disallowed identity (S16) and a client without a certificate (S17)."
+    },
+    {
+      "ref_id": "ITGRC-EV-REVOCATION",
+      "name": "ITGRC-EV-REVOCATION Policy revocation (S9)",
+      "scenarios": [
+        9
+      ],
+      "description": "New tokens are denied after the grant is removed from the policy (S9)."
+    },
+    {
+      "ref_id": "ITGRC-EV-KEY-ROTATION",
+      "name": "ITGRC-EV-KEY-ROTATION Signing key rotation (S11)",
+      "scenarios": [
+        11
+      ],
+      "description": "After a restart the new signing key is accepted, and a planned overlap keeps tokens signed with the old and the new key verifiable (S11)."
+    },
+    {
+      "ref_id": "ITGRC-EV-AUDIT-CHAIN",
+      "name": "ITGRC-EV-AUDIT-CHAIN Audit hash chain (S14)",
+      "scenarios": [
+        14
+      ],
+      "description": "Audit record links verify and the checkpoint detects deletion of the log tail (S14)."
+    },
+    {
+      "ref_id": "ITGRC-EV-FHIR-AUDIT",
+      "name": "ITGRC-EV-FHIR-AUDIT FHIR audit minimization (S18)",
+      "scenarios": [
+        18
+      ],
+      "description": "FHIR audit records name the calling workload and keep patient ids only as HMAC values (S18)."
+    },
+    {
+      "ref_id": "ITGRC-EV-IDENTITY-LIMITS",
+      "name": "ITGRC-EV-IDENTITY-LIMITS Identity limits (S7, S10)",
+      "scenarios": [
+        7,
+        10
+      ],
+      "description": "In explicit reuse mode a cached SVID is reused within its lifetime (S7), and a valid identity with a granted scope cannot prove the intent of a write (S10)."
+    }
+  ],
+  "applied_controls": [
+    {
+      "ref_id": "ITGRC-AC-KEY-ROTATION",
+      "name": "Signing key rotation with overlap",
+      "category": "technical",
+      "csf_function": "protect",
+      "evidence": [
+        "ITGRC-EV-KEY-ROTATION"
+      ],
+      "description": "Gateway signing keys rotate on restart with a planned overlap, so tokens issued before the rotation stay verifiable (S11). Lab implementation only; production key management is not assessed."
+    }
+  ],
+  "requirements": [
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node211",
+      "name": "5. Implement Access Control Procedures Using Selected Hardware and Software",
+      "section": "164.312(a)",
+      "cfr": "164.312(a)(1)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": "observation_sensitive_point",
+      "evidence": [
+        "ITGRC-EV-ACCESS"
+      ],
+      "supporting_evidence": [
+        "ITGRC-EV-IDENTITY-LIMITS"
+      ],
+      "applied_controls": [],
+      "rationale": "Per-tool scopes are enforced for workload identities: allowlisted calls succeed and out-of-scope tools are denied (S1, S2, S10).",
+      "limits": "Workload identities and lab tools only; no person users. Sensitive point: identity cannot prove intent (S10), and a cached SVID can be reused within its lifetime (S7)."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node57",
+      "name": "2. Implement Policies and Procedures for Authorizing Access",
+      "section": "164.308(a)(4)",
+      "cfr": "164.308(a)(4)(ii)(B)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-ACCESS"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Access to lab tools is granted per workload identity and per scope in a policy (S1, S2, S10).",
+      "limits": "Workload identities and lab tools only; no documented authorization procedure and no workforce process."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node59",
+      "name": "Implementation Specification (Addressable)",
+      "section": "164.308(a)(4)",
+      "cfr": "164.308(a)(4)(ii)(B)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-ACCESS"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Access authorization is enforced per workload identity and per scope (S1, S2, S10).",
+      "limits": "Workload identities and lab tools only; no documented authorization procedure and no workforce process."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node205",
+      "name": "3. Ensure that All System Users Have Been Assigned a Unique Identifier",
+      "section": "164.312(a)",
+      "cfr": "164.312(a)(2)(i)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-IDENTITY"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Each workload has a unique SPIFFE identity; unlisted or copied identities are refused, and the gateway uses its own identity upstream (S3, S5, S8).",
+      "limits": "Workload identities only; unique identifiers for people are not assessed."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node207",
+      "name": "Implementation Specification (Required)",
+      "section": "164.312(a)",
+      "cfr": "164.312(a)(2)(i)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-IDENTITY"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Unique workload identification: unlisted or copied identities are refused (S3, S5, S8).",
+      "limits": "Workload identities only; unique identifiers for people are not assessed."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node258",
+      "name": "3. Select and Implement   Authentication Options",
+      "section": "164.312(d)",
+      "cfr": "164.312(d)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": "observation_sensitive_point",
+      "evidence": [
+        "ITGRC-EV-ASSERTION",
+        "ITGRC-EV-FHIR-MTLS"
+      ],
+      "supporting_evidence": [
+        "ITGRC-EV-KEY-ROTATION",
+        "ITGRC-EV-IDENTITY-LIMITS"
+      ],
+      "applied_controls": [
+        "ITGRC-AC-KEY-ROTATION"
+      ],
+      "rationale": "Workload authentication rejects replayed, expired, reused and untrusted assertions, and the FHIR gateway requires an allowed mTLS identity with OAuth (S4, S6, S12, S13, S15 to S17). Key rotation with overlap keeps verification working across restarts (S11).",
+      "limits": "Workload authentication in the lab only; person authentication and SMART on FHIR are not implemented. Sensitive point: a cached SVID can be reused within its lifetime (S7), and identity cannot prove intent (S10)."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node265",
+      "name": "3. Implement Integrity Controls",
+      "section": "164.312(e)(1)",
+      "cfr": "164.312(e)(2)(i)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-FHIR-MTLS"
+      ],
+      "supporting_evidence": [
+        "ITGRC-EV-KEY-ROTATION"
+      ],
+      "applied_controls": [
+        "ITGRC-AC-KEY-ROTATION"
+      ],
+      "rationale": "Calls to the FHIR gateway use mutual TLS with SPIRE certificates; disallowed or missing client certificates are refused (S15 to S17). Key rotation with overlap is supporting evidence (S11).",
+      "limits": "Lab SPIRE CA and a sandbox FHIR server only; no transmission inventory, certificate lifecycle or production network."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node267",
+      "name": "Implementation Specification (Addressable)",
+      "section": "164.312(e)(1)",
+      "cfr": "164.312(e)(2)(i)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-FHIR-MTLS"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Transmission integrity to the FHIR gateway relies on mutual TLS; disallowed or missing client certificates are refused (S15 to S17).",
+      "limits": "Lab SPIRE CA and a sandbox FHIR server only; no transmission inventory, certificate lifecycle or production network."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node269",
+      "name": "4. Implement Encryption",
+      "section": "164.312(e)(1)",
+      "cfr": "164.312(e)(2)(ii)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-FHIR-MTLS"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Traffic to the FHIR gateway is encrypted with mutual TLS (S15 to S17).",
+      "limits": "Lab SPIRE CA and a sandbox FHIR server only; no transmission inventory, certificate lifecycle or production network."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node271",
+      "name": "Implementation Specification (Addressable)",
+      "section": "164.312(e)(1)",
+      "cfr": "164.312(e)(2)(ii)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-FHIR-MTLS"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Encryption in transit to the FHIR gateway uses mutual TLS (S15 to S17).",
+      "limits": "Lab SPIRE CA and a sandbox FHIR server only; no transmission inventory, certificate lifecycle or production network."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node225",
+      "name": "9. Terminate Access if it is No Longer Required",
+      "section": "164.312(a)",
+      "cfr": "164.312(a)(1)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-REVOCATION"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Removing a grant from the policy denies new tokens for that workload (S9).",
+      "limits": "Tokens issued before a revocation stay valid for up to 300 seconds; workforce termination is not assessed."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node213",
+      "name": "6. Review and Update Access for Users and Processes",
+      "section": "164.312(a)",
+      "cfr": "164.312(a)(1)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-REVOCATION"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Access changes in the policy take effect for new token requests (S9).",
+      "limits": "Tokens issued before a revocation stay valid for up to 300 seconds; workforce termination is not assessed."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node61",
+      "name": "3. Implement Policies and Procedures for Access Establishment and Modification",
+      "section": "164.308(a)(4)",
+      "cfr": "164.308(a)(4)(ii)(C)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-REVOCATION"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Access modification is applied through the policy: a removed grant denies new tokens (S9).",
+      "limits": "Tokens issued before a revocation stay valid for up to 300 seconds; no documented modification procedure."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node63",
+      "name": "Implementation Specification (Addressable)",
+      "section": "164.308(a)(4)",
+      "cfr": "164.308(a)(4)(ii)(C)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-REVOCATION"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Access establishment and modification take effect through the policy for new tokens (S9).",
+      "limits": "Tokens issued before a revocation stay valid for up to 300 seconds; no documented modification procedure."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node236",
+      "name": "5. Implement the Audit/System Activity Review Process",
+      "section": "164.312(b)",
+      "cfr": "164.312(b)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-AUDIT-CHAIN",
+        "ITGRC-EV-FHIR-AUDIT"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Gateway audit records are hash-chained and a checkpoint detects tail deletion; FHIR audit records name the calling workload (S14, S18).",
+      "limits": "Audit records only; the checkpoint is stored beside the log, there is no retention and no regular review process. HMAC patient ids are pseudonymization, not de-identification."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node230",
+      "name": "2. Select the Tools that Will Be Deployed for Auditing and System Activity Reviews",
+      "section": "164.312(b)",
+      "cfr": "164.312(b)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-AUDIT-CHAIN"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "A hash-chained audit log with checkpoint verification is the audit tool used in the lab (S14).",
+      "limits": "Audit records only; the checkpoint is stored beside the log; no retention and no central collection."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node24",
+      "name": "Implementation Specification (Required)",
+      "section": "164.308(a)(1)",
+      "cfr": "164.308(a)(1)(ii)(D)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-AUDIT-CHAIN"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Audit records can be checked for integrity before a review (S14).",
+      "limits": "Audit records only; no information system activity review procedure or schedule is evidenced."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node247",
+      "name": "5. Implement a Mechanism to Authenticate ePHI",
+      "section": "164.312(c)",
+      "cfr": "164.312(c)(2)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-AUDIT-CHAIN"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "Hash links and the checkpoint detect alteration or deletion of audit records (S14).",
+      "limits": "Covers audit records only, not ePHI; the checkpoint is stored beside the log."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node249",
+      "name": "Implementation Specification (Addressable)",
+      "section": "164.312(c)",
+      "cfr": "164.312(c)(2)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-AUDIT-CHAIN"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "An electronic mechanism detects alteration or deletion of audit records (S14).",
+      "limits": "Covers audit records only, not ePHI; the checkpoint is stored beside the log."
+    },
+    {
+      "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node228",
+      "name": "1. Determine the Activities that Will Be Tracked or Audited",
+      "section": "164.312(b)",
+      "cfr": "164.312(b)",
+      "result": "partially_compliant",
+      "status": "in_review",
+      "extended_result": null,
+      "evidence": [
+        "ITGRC-EV-FHIR-AUDIT"
+      ],
+      "supporting_evidence": [],
+      "applied_controls": [],
+      "rationale": "FHIR access is audited with the calling workload and minimized patient data (S18).",
+      "limits": "HMAC patient ids are pseudonymization, not de-identification; the scope is the sandbox FHIR gateway."
+    }
+  ],
+  "not_verified": [
+    {
+      "id": "physical-safeguards",
+      "cfr": "164.310",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "physical safeguards are outside the lab; no facility, workstation, device or media evidence.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node148",
+          "name": "1. Conduct an Analysis of Existing Physical Security Vulnerabilities",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node150",
+          "name": "2. Identify Corrective Measures",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node152",
+          "name": "3. Develop a Facility Security Plan",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node154",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node156",
+          "name": "4. Develop Access Control and Validation Procedures",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node158",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node160",
+          "name": "5. Establish Contingency Operations Procedures",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node162",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node164",
+          "name": "6. Maintain Maintenance Records",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node166",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node169",
+          "name": "1. Identify Workstation and Device Types and Functions or Uses",
+          "section": "164.310(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node171",
+          "name": "2. Identify the Expected Performance of Each Type of Workstation and Device",
+          "section": "164.310(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node173",
+          "name": "3. Analyze Physical Surroundings for Physical Attributes",
+          "section": "164.310(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node176",
+          "name": "1. Identify All Methods of Physical Access to Workstations and Devices",
+          "section": "164.310(c)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node178",
+          "name": "2. Analyze the Risks Associated with Each Type of Access",
+          "section": "164.310(c)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node180",
+          "name": "3. Identify and Implement Physical Safeguards for Workstations and Devices",
+          "section": "164.310(c)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node183",
+          "name": "1. Implement Methods for the Final Disposal of ePHI",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node185",
+          "name": "Implementation Specification (Required)",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node187",
+          "name": "2. Develop and Implement Procedures for the Reuse of Electronic Media",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node189",
+          "name": "Implementation Specification (Required)",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node191",
+          "name": "3. Maintain Accountability for Hardware and Electronic Media",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node193",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node195",
+          "name": "4. Develop Data Backup and Storage Procedures",
+          "section": "164.310(d)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node197",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.310(d)"
+        }
+      ]
+    },
+    {
+      "id": "risk-analysis",
+      "cfr": "164.308(a)(1)(ii)(A)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no risk analysis was performed or supplied for the lab.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node6",
+          "name": "2. Conduct Risk Assessment",
+          "section": "164.308(a)(1)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node8",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(a)(1)"
+        }
+      ]
+    },
+    {
+      "id": "workforce-security",
+      "cfr": "164.308(a)(3)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no workforce authorization, clearance or termination procedure is evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node36",
+          "name": "1. Implement Policies and Procedures for Authorization and/or Supervision",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node38",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node40",
+          "name": "2. Establish Clear Job Descriptions and Responsibilities",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node42",
+          "name": "3. Establish Criteria and Procedures for Hiring and Assigning Tasks",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node44",
+          "name": "4. Establish a Workforce Clearance Procedure",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node46",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node48",
+          "name": "5. Establish Termination Procedures",
+          "section": "164.308(a)(3)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node50",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(3)"
+        }
+      ]
+    },
+    {
+      "id": "security-awareness-training",
+      "cfr": "164.308(a)(5)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no security awareness or training evidence.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node68",
+          "name": "1. Conduct a Training Needs Assessment",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node70",
+          "name": "2. Develop and Approve a Training Strategy and a Plan",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node72",
+          "name": "3. Protection from Malicious Software, Login Monitoring, and Password Management",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node74",
+          "name": "Implementation Specification (Protection from Malicious Software)",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node76",
+          "name": "Implementation Specification (Log-in Monitoring)",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node78",
+          "name": "Implementation Specification (Password Management)",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node80",
+          "name": "4. Develop Appropriate Awareness and Training Content, Materials, and Methods",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node82",
+          "name": "5. Implement the Training",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node84",
+          "name": "6. Implement Security Reminders",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node86",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(5)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node88",
+          "name": "7. Monitor and Evaluate the Training Plan",
+          "section": "164.308(a)(5)"
+        }
+      ]
+    },
+    {
+      "id": "security-incident-procedures",
+      "cfr": "164.308(a)(6)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no incident response procedure or exercise is evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node91",
+          "name": "1. Determine the Goals of Incident Response",
+          "section": "164.308(a)(6)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node93",
+          "name": "2. Develop and Deploy an Incident Response Team or Other Reasonable and Appropriate Response Mechanism",
+          "section": "164.308(a)(6)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node95",
+          "name": "3. Develop and Implement Policy and Procedures to Respond to and Report Security Incidents",
+          "section": "164.308(a)(6)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node97",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(a)(6)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node99",
+          "name": "4. Incorporate Post-Incident Analysis into Updates and Revisions",
+          "section": "164.308(a)(6)"
+        }
+      ]
+    },
+    {
+      "id": "contingency-plan",
+      "cfr": "164.308(a)(7)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no backup, disaster recovery, emergency mode or contingency test evidence.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node102",
+          "name": "1. Develop a Contingency Planning Policy",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node104",
+          "name": "2. Conduct an Applications and Data Criticality Analysis",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node106",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node108",
+          "name": "3. Identify Preventive Measures",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node110",
+          "name": "4. Develop Recovery Strategy",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node112",
+          "name": "5. Data Backup Plan and Disaster Recovery Plan",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node114",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node116",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node118",
+          "name": "6. Develop and Implement an Emergency Mode Operation Plan",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node120",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node122",
+          "name": "7. Testing and Revision Procedure",
+          "section": "164.308(a)(7)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node124",
+          "name": "Implementation Specification (Addressable)",
+          "section": "164.308(a)(7)"
+        }
+      ]
+    },
+    {
+      "id": "evaluation",
+      "cfr": "164.308(a)(8)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no periodic technical and nontechnical evaluation is evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node127",
+          "name": "1. Determine Whether Internal or External Evaluation is Most Appropriate",
+          "section": "164.308(a)(8)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node129",
+          "name": "2. Develop Standards and Measurements for Reviewing All Standards and Implementation Specifications of the Security Rule",
+          "section": "164.308(a)(8)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node131",
+          "name": "3. Conduct Evaluation",
+          "section": "164.308(a)(8)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node133",
+          "name": "4. Document Results",
+          "section": "164.308(a)(8)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node135",
+          "name": "5. Repeat Evaluations Periodically",
+          "section": "164.308(a)(8)"
+        }
+      ]
+    },
+    {
+      "id": "business-associate-contracts",
+      "cfr": "164.308(b)(1)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no business associate contracts or other arrangements are evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node138",
+          "name": "1. Identify Entities that are Business Associates Under the HIPAA Security Rule",
+          "section": "164.308(b)(1)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node140",
+          "name": "2. Establish a Process for Measuring Contract Performance and Terminating the Contract if Security Requirements Are Not Being Met",
+          "section": "164.308(b)(1)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node142",
+          "name": "3. Written Contract or Other Arrangement",
+          "section": "164.308(b)(1)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node144",
+          "name": "Implementation Specification (Required)",
+          "section": "164.308(b)(1)"
+        }
+      ]
+    },
+    {
+      "id": "emergency-access",
+      "cfr": "164.312(a)(2)(ii)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no emergency access procedure is evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node215",
+          "name": "7. Establish an Emergency Access Procedure",
+          "section": "164.312(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node217",
+          "name": "Implementation Specification (Required)",
+          "section": "164.312(a)"
+        }
+      ]
+    },
+    {
+      "id": "automatic-logoff-and-encryption-at-rest",
+      "cfr": "164.312(a)(2)(iii), 164.312(a)(2)(iv)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "automatic logoff and encryption at rest are not evidenced; the lab tests encryption in transit only.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node219",
+          "name": "8. Automatic Logoff and Encryption and Decryption",
+          "section": "164.312(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node221",
+          "name": "Implementation Specification (Automatic Logoff)",
+          "section": "164.312(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node223",
+          "name": "Implementation Specification (Encryption and Decryption)",
+          "section": "164.312(a)"
+        }
+      ]
+    },
+    {
+      "id": "transmission-inventory",
+      "cfr": "164.312(e)(1)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no inventory of ePHI transmission pathways; only the lab FHIR gateway path is tested.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node261",
+          "name": "1. Identify Any Possible Unauthorized Sources that May Be Able to Intercept and/or Modify the Information",
+          "section": "164.312(e)(1)"
+        }
+      ]
+    },
+    {
+      "id": "organizational-requirements",
+      "cfr": "164.314",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "business associate contract and group health plan requirements are not evidenced.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node275",
+          "name": "1. Contract Must Provide that Business Associates Will Comply with the Applicable Requirements of the Security Rule",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node277",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node279",
+          "name": "2. Contract Must Provide that the Business Associates Enter into Contracts with Subcontractors to Ensure the Protection of ePHI",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node281",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node283",
+          "name": "3. Contract Must Provide that Business Associates will Report Security Incidents",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node285",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node287",
+          "name": "4. Other Arrangements",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node289",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node291",
+          "name": "5. Business Associate Contracts with Subcontractors",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node293",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(a)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node296",
+          "name": "1. Amend Plan Documents of the Group Health Plan to Address the Plan Sponsor\u2019s Security of ePHI",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node298",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node300",
+          "name": "2. Amend Plan Documents of the Group Health Plan to Address Adequate Separation",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node302",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node304",
+          "name": "3. Amend Plan Documents of the Group Health Plan to Address the Security of ePHI Supplied to the Plan Sponsors\u2019 Agents and Subcontractors",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node306",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node308",
+          "name": "4. Amend Plan Documents of Group Health Plans to Address the Reporting of Security Incidents",
+          "section": "164.314(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node310",
+          "name": "Implementation Specification (Required)",
+          "section": "164.314(b)"
+        }
+      ]
+    },
+    {
+      "id": "documentation-retention",
+      "cfr": "164.316(b)(2)(i)",
+      "result": "not_assessed",
+      "status": "to_do",
+      "reason": "no six-year documentation retention; lab reports have no retention policy.",
+      "nodes": [
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node321",
+          "name": "2. Retain Documentation for at Least Six Years",
+          "section": "164.316(b)"
+        },
+        {
+          "urn": "urn:intuitem:risk:req_node:nist-sp-800-66-rev2:node323",
+          "name": "Implementation Specification (Required)",
+          "section": "164.316(b)"
+        }
+      ]
+    }
+  ]
+}

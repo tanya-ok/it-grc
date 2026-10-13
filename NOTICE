@@ -1,0 +1,20 @@
+IT GRC
+Copyright 2026 Tanya Babitskaya
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+IT GRC uses the unmodified intuitem CISO Assistant Community edition
+(AGPL-3.0-or-later) as an external service over HTTP. This repository contains
+no CISO Assistant source code, API schemas or library files. Framework libraries
+are loaded into that service by URN. IT GRC is not affiliated with or endorsed by
+intuitem.
+
+Public HHS pages and the NIST SP 800-66 rev2 framework are referenced by URL or
+URN; the repository does not distribute a copy of the regulation or the
+framework. Python, Lima, k3s, Helm, Caddy and the sibling security-lab projects
+keep their respective upstream terms. No container images or binaries are
+included.
+
+The lab report fixture and all CISO Assistant objects created by the bridge hold
+synthetic data only. No private third-party materials or real patient records
+are included.

@@ -1,0 +1,120 @@
+{
+  "proposal_schema": 1,
+  "status": "pending-maintainer-review",
+  "installation_authorized": false,
+  "basis_commit": "38b10a9efc6a1c4cf977a616e7b3799be300f2b2",
+  "source": {
+    "repository": "ai-assurance",
+    "commit": "353d374a00b43479870a6dee300dd200529cc60c",
+    "version": "0.2.1"
+  },
+  "profile_candidate": {
+    "schema": 2,
+    "project_id": "it-grc",
+    "scope": "Offline synthetic lab-report ingestion, evidence ledger and CISO Assistant API contract; no live CE verification or compliance certification.",
+    "ci": {
+      "repository": "tanya-ok/it-grc",
+      "workflow": ".github/workflows/ci.yml"
+    },
+    "controls": {
+      "access-boundary": {
+        "applicable": true,
+        "claim": "API operations use explicit scoped configuration and refuse unsafe prerequisites.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      },
+      "data-exposure": {
+        "applicable": true,
+        "claim": "CLI and report validation do not include private credentials in assessment output.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      },
+      "untrusted-instructions": {
+        "applicable": true,
+        "claim": "Imported report content is validated as evidence and never grants execution authority.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      },
+      "consequential-actions": {
+        "applicable": true,
+        "claim": "The push bridge preserves its review/result ceiling and does not auto-approve evidence.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      },
+      "evidence-lineage": {
+        "applicable": true,
+        "claim": "Ledger tampering is checked against retained evidence and checkpoint contracts.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      },
+      "bounded-claims": {
+        "applicable": true,
+        "claim": "Mapping and repository checks distinguish missing evidence from failure and retain scope limits.",
+        "ci_checks": [
+          "test (3.12)",
+          "test (3.13)",
+          "test (3.14)"
+        ]
+      }
+    }
+  },
+  "evidence_plan": {
+    "access-boundary": {
+      "paths": [
+        "tests/test_grc_client.py",
+        "tests/test_grc_ops.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    },
+    "data-exposure": {
+      "paths": [
+        "tests/test_cli.py",
+        "tests/test_lab_report.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    },
+    "untrusted-instructions": {
+      "paths": [
+        "tests/test_lab_report.py",
+        "tests/test_grc_push.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    },
+    "consequential-actions": {
+      "paths": [
+        "tests/test_grc_push.py",
+        "tests/test_grc_mapping.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    },
+    "evidence-lineage": {
+      "paths": [
+        "tests/test_grc_ledger.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    },
+    "bounded-claims": {
+      "paths": [
+        "tests/test_grc_mapping.py",
+        "tests/test_validate_repository.py"
+      ],
+      "limitations": "Source inspection only; a passing job is not proof of every claim."
+    }
+  },
+  "remaining_gaps": "Private repository: the current public-only installer cannot verify its CI and must refuse installation. A separately reviewed private CI collector is required. Offline fake API tests are not live CISO Assistant acceptance."
+}

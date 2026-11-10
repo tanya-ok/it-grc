@@ -36,8 +36,8 @@ it-grc = "it_grc.cli:main"
 
 [dependency-groups]
 dev = [
-  "ruff==0.17.1",
-  "mypy==2.4.0",
+  "ruff==0.17.3",
+  "mypy==2.4.1",
 ]
 
 [tool.hatch.version]
